@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+    <body>
+
+    <p>Simple API tester</p>
+
+    <form id="frm1">
+        <table style="width:500px; border:1px solid black">
+            <tr><td style="width:300px">Method:</td>
+                <td><select name="method">
+                    <option value="connector">Snowflake Connector</option>
+                    <option value="snowpark">Snowpark Python</option>
+                </select>
+                </td>
+            </tr>
+        </table>
+    </form>
+    <hr>    
+    <form id="frm2">
+        <table style="width:500px; border:1px solid black">
+            <caption>Top 10 Customers</caption>
+            <tr><td style="width:300px">Start Date (YYYY-MM-DD)</td><td><input type="text" name="start_date" size="12" value="1995-01-01"></td></tr>
+            <tr><td style="width:300px">End Date (YYYY-MM-DD)</td><td><input type="text" name="end_date" size="12" value="1995-03-31"></td></tr>
+            <tr><td style="width:300px"><input type="button" onclick="top10()" value="Submit"></td></tr>
+        </table>
+    </form>
+    <hr>
+    <form id="frm3">
+        <table style="width:500px; border:1px solid black">
+            <caption>Monthly Clerk Sales</caption>
+            <tr><td style="width:300px">Clerk ID</td><td><input type="text" name="clerkid" size="12" value="000000001"></td></tr>
+            <tr><td style="width:300px">Year (YYYY)</td><td><input type="text" name="year" size="12" value="1995"></td></tr>
+            <tr><td style="width:300px"><input type="button" onclick="clerk_sales()" value="Submit"></td></tr>
+        </table>
+    </form>
+
+
+    <hr>
+    <form id="results">
+        <table style="width:500px; border:1px solid black">
+            <caption>Output from API call</caption>
+            <tr><td><p id="output"></p></td></tr>
+        </table>
+        <input type="button" onclick="clear_results()" value="Clear Results">
+    </form>    
+
+    <script>
+        function top10() {
+            dm = document.getElementById("frm1").elements;
+            method = dm[0].value
+            d = document.getElementById("frm2").elements;
+            start_date = d[0].value
+            end_date = d[1].value
+            apiurl = "http://localhost/" + method + "/customers/top10?start_range=" + start_date + "&end_range=" + end_date
+            document.getElementById("output").innerHTML = "Getting Data";
+            fetch(apiurl)
+                .then(response => response.json())
+                .then(data => document.getElementById("output").innerHTML = "<pre>" + JSON.stringify(data, null, "  ") + "</pre>")
+                .catch(error => document.getElementById("output").innerHTML = "There was an error: " + error)
+        }
+
+        function clerk_sales() {
+            dm = document.getElementById("frm1").elements;
+            method = dm[0].value
+            d = document.getElementById("frm3").elements;
+            clerkid = d[0].value
+            year = d[1].value
+            apiurl = "http://localhost/" + method + "/clerk/" + clerkid + "/yearly_sales/" + year
+            document.getElementById("output").innerHTML = "Getting Data";
+            fetch(apiurl)
+                .then(response => response.json())
+                .then(data => document.getElementById("output").innerHTML = "<pre>" + JSON.stringify(data, null, "  ") + "</pre>")
+                .catch(error => document.getElementById("output").innerHTML = "There was an error: " + error)
+        }
+
+        function clear_results() {
+            document.getElementById("output").innerHTML = "";
+        }
+    </script>
+
+    </body>
+</html>
