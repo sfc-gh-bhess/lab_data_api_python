@@ -3,10 +3,24 @@ import json
 import datetime
 
 # Make the Snowflake connection
+from cryptography.hazmat.backends import default_backend
+from cryptography.hazmat.primitives import serialization
 from snowflake.snowpark import Session
 import snowflake.snowpark.functions as f
+from config import creds
 def connect() -> Session:
-    creds = json.load(open('config.json', 'r'))
+    if 'private_key' in creds:
+        if not isinstance(creds['private_key'], bytes):
+            p_key = serialization.load_pem_private_key(
+                    creds['private_key'].encode('utf-8'),
+                    password=None,
+                    backend=default_backend()
+                )
+            pkb = p_key.private_bytes(
+                encoding=serialization.Encoding.DER,
+                format=serialization.PrivateFormat.PKCS8,
+                encryption_algorithm=serialization.NoEncryption())
+            creds['private_key'] = pkb
     return Session.builder.configs(creds).create()
 
 session = connect()

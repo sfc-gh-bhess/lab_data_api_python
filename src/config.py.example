@@ -1,6 +1,8 @@
-{
+creds = {
     "account": "<SNOWFLAKE ACCOUNT>",
     "user": "<SNOWFLAKE USER>",
-    "password": "<SNOWFLAKE PASSWORD>",
+    "private_key": """
+<SNOWFLAKE PRIVATE KEY>
+    """,
     "warehouse": "<SNOWFLAKE WAREHOUSE>"
 }
