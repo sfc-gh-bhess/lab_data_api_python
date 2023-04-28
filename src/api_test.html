@@ -51,7 +51,7 @@
             d = document.getElementById("frm2").elements;
             start_date = d[0].value
             end_date = d[1].value
-            apiurl = "http://localhost/" + method + "/customers/top10?start_range=" + start_date + "&end_range=" + end_date
+            apiurl = "/" + method + "/customers/top10?start_range=" + start_date + "&end_range=" + end_date
             document.getElementById("output").innerHTML = "Getting Data";
             fetch(apiurl)
                 .then(response => response.json())
@@ -65,7 +65,7 @@
             d = document.getElementById("frm3").elements;
             clerkid = d[0].value
             year = d[1].value
-            apiurl = "http://localhost/" + method + "/clerk/" + clerkid + "/yearly_sales/" + year
+            apiurl = "/" + method + "/clerk/" + clerkid + "/yearly_sales/" + year
             document.getElementById("output").innerHTML = "Getting Data";
             fetch(apiurl)
                 .then(response => response.json())
