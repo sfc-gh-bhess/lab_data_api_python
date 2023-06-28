@@ -1,8 +1,6 @@
 creds = {
     "account": "<SNOWFLAKE ACCOUNT>",
     "user": "<SNOWFLAKE USER>",
-    "private_key": """
-<SNOWFLAKE PRIVATE KEY>
-    """,
+    "password": "<SNOWFLAKE_USER_PASSWORD>",
     "warehouse": "<SNOWFLAKE WAREHOUSE>"
 }
