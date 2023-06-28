@@ -11,7 +11,6 @@ Snowflake via key pair authentication.
 * Snowflake user with
   * SELECT access to the `SNOWFLAKE_SAMPLES.TPCH_SF10.ORDERS` table
   * USAGE access on a warehouse
-  * SSH keypair for access
 * Python 3.8
 * Anaconda (or Miniconda)
 
@@ -33,9 +32,10 @@ conda activate pylab
 Use the template in `config.py.example` to enter your information in JSON format:
 * account
 * user
-* private key
+* password
 * Snowflake warehouse
 
+See [Snowflake documentation](https://docs.snowflake.com/en/developer-guide/python-connector/python-connector-api#label-account-format-info) for information on how to find your account identifier.
 
 ## Running
 To start the server, from the `src/` directory, run:
