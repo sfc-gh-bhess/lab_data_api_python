@@ -1,26 +1,24 @@
-from flask import Blueprint, request, abort, jsonify, make_response
-import json
 import datetime
+import os
+
+import snowflake.connector
+from flask import Blueprint, request, abort, jsonify, make_response
 
 # Make the Snowflake connection
-from cryptography.hazmat.backends import default_backend
-from cryptography.hazmat.primitives import serialization
-import snowflake.connector
-from snowflake.connector import DictCursor
-from config import creds
+
 def connect() -> snowflake.connector.SnowflakeConnection:
-    if 'private_key' in creds:
-        if not isinstance(creds['private_key'], bytes):
-            p_key = serialization.load_pem_private_key(
-                    creds['private_key'].encode('utf-8'),
-                    password=None,
-                    backend=default_backend()
-                )
-            pkb = p_key.private_bytes(
-                encoding=serialization.Encoding.DER,
-                format=serialization.PrivateFormat.PKCS8,
-                encryption_algorithm=serialization.NoEncryption())
-            creds['private_key'] = pkb
+    creds = {
+        'host': os.getenv('SNOWFLAKE_HOST'),
+        'port': os.getenv('SNOWFLAKE_PORT'),
+        'protocol': "https",
+        'account': os.getenv('SNOWFLAKE_ACCOUNT'),
+        'authenticator': "oauth",
+        'token': open('/snowflake/session/token', 'r').read(),
+        'warehouse': os.getenv('SNOWFLAKE_WAREHOUSE'),
+        'database': os.getenv('SNOWFLAKE_DATABASE'),
+        'schema': os.getenv('SNOWFLAKE_SCHEMA'),
+        'client_session_keep_alive': True
+    }
     return snowflake.connector.connect(**creds)
 
 conn = connect()

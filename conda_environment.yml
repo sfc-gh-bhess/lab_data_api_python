@@ -1,8 +1,0 @@
-name: pylab
-channels:
-  - defaults
-dependencies:
-  - python=3.8
-  - snowflake-snowpark-python
-  - flask
-prefix: /Users/bhess/miniconda3/envs/pylab
