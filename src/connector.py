@@ -14,14 +14,12 @@ def connect() -> snowflake.connector.SnowflakeConnection:
         'account': os.getenv('SNOWFLAKE_ACCOUNT'),
         'authenticator': "oauth",
         'token': open('/snowflake/session/token', 'r').read(),
-        'warehouse': os.getenv('SNOWFLAKE_WAREHOUSE'),
-        'database': os.getenv('SNOWFLAKE_DATABASE'),
-        'schema': os.getenv('SNOWFLAKE_SCHEMA'),
+        'warehouse': "DATA_API_WH",
+        'database': "API",
+        'schema': "PUBLIC",
         'client_session_keep_alive': True
     }
     return snowflake.connector.connect(**creds)
-
-conn = connect()
 
 # Make the API endpoints
 connector = Blueprint('connector', __name__)
@@ -52,6 +50,7 @@ def customers_top10():
     '''
     sql = sql_string.format(sdt=sdt, edt=edt)
     try:
+        conn = connect()
         res = conn.cursor(DictCursor).execute(sql)
         return make_response(jsonify(res.fetchall()))
     except:
@@ -81,6 +80,7 @@ def clerk_montly_sales(clerkid, year):
     '''
     sql = sql_string.format(year=year_int, clerkid=clerkid_str)
     try:
+        conn = connect()
         res = conn.cursor(DictCursor).execute(sql)
         return make_response(jsonify(res.fetchall()))
     except:
