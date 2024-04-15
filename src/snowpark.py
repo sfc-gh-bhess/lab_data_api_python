@@ -15,12 +15,14 @@ def connect() -> Session:
         'account': os.getenv('SNOWFLAKE_ACCOUNT'),
         'authenticator': "oauth",
         'token': open('/snowflake/session/token', 'r').read(),
-        'warehouse': "DATA_API_WH",
-        'database': "API",
-        'schema': "PUBLIC",
+        'warehouse': os.getenv('SNOWFLAKE_WAREHOUSE'),
+        'database': os.getenv('SNOWFLAKE_DATABASE'),
+        'schema': os.getenv('SNOWFLAKE_SCHEMA'),
         'client_session_keep_alive': True
     }
     return Session.builder.configs(creds).create()
+
+session = connect()
 
 # Make the API endpoints
 snowpark = Blueprint('snowpark', __name__)
@@ -39,7 +41,6 @@ def customers_top10():
     except:
         abort(400, "Invalid start and/or end dates.")
     try:
-        session = connect()
         df = session.table('snowflake_sample_data.tpch_sf10.orders') \
                 .filter((f.col('O_ORDERDATE') >= sdt) & (f.col('O_ORDERDATE') <= edt)) \
                 .group_by(f.col('O_CUSTKEY')) \
@@ -62,7 +63,6 @@ def clerk_montly_sales(clerkid, year):
         abort(400, "Clerk ID can only contain numbers.")
     clerkid_str = f"Clerk#{clerkid}"
     try:
-        session = connect()
         df = session.table('snowflake_sample_data.tpch_sf10.orders') \
                 .filter(f.year(f.col('O_ORDERDATE')) == year_int) \
                 .filter(f.col('O_CLERK') == clerkid_str) \
