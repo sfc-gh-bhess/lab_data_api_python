@@ -1,26 +1,36 @@
-from flask import Blueprint, request, abort, make_response, jsonify
-import json
 import datetime
+import os
+
+from flask import Blueprint, request, abort, make_response, jsonify
 
 # Make the Snowflake connection
-from cryptography.hazmat.backends import default_backend
-from cryptography.hazmat.primitives import serialization
 from snowflake.snowpark import Session
 import snowflake.snowpark.functions as f
-from config import creds
+
 def connect() -> Session:
-    if 'private_key' in creds:
-        if not isinstance(creds['private_key'], bytes):
-            p_key = serialization.load_pem_private_key(
-                    creds['private_key'].encode('utf-8'),
-                    password=None,
-                    backend=default_backend()
-                )
-            pkb = p_key.private_bytes(
-                encoding=serialization.Encoding.DER,
-                format=serialization.PrivateFormat.PKCS8,
-                encryption_algorithm=serialization.NoEncryption())
-            creds['private_key'] = pkb
+    if os.path.isfile("/snowflake/session/token"):
+        creds = {
+            'host': os.getenv('SNOWFLAKE_HOST'),
+            'port': os.getenv('SNOWFLAKE_PORT'),
+            'protocol': "https",
+            'account': os.getenv('SNOWFLAKE_ACCOUNT'),
+            'authenticator': "oauth",
+            'token': open('/snowflake/session/token', 'r').read(),
+            'warehouse': os.getenv('SNOWFLAKE_WAREHOUSE'),
+            'database': os.getenv('SNOWFLAKE_DATABASE'),
+            'schema': os.getenv('SNOWFLAKE_SCHEMA'),
+            'client_session_keep_alive': True
+        }
+    else:
+        creds = {
+            'account': os.getenv('SNOWFLAKE_ACCOUNT'),
+            'user': os.getenv('SNOWFLAKE_USER'),
+            'password': os.getenv('SNOWFLAKE_PASSWORD'),
+            'warehouse': os.getenv('SNOWFLAKE_WAREHOUSE'),
+            'database': os.getenv('SNOWFLAKE_DATABASE'),
+            'schema': os.getenv('SNOWFLAKE_SCHEMA'),
+            'client_session_keep_alive': True
+        }
     return Session.builder.configs(creds).create()
 
 session = connect()

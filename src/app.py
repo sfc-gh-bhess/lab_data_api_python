@@ -1,6 +1,12 @@
+import os
+import ngrok
+import logging
+
 from flask import Flask, jsonify, make_response, send_file
 from connector import connector
 from snowpark import snowpark
+
+logging.basicConfig(level=logging.INFO)
 
 app = Flask(__name__)
 app.register_blueprint(connector, url_prefix='/connector')
@@ -19,4 +25,7 @@ def resource_not_found(e):
     return make_response(jsonify(error='Not found!'), 404)
 
 if __name__ == '__main__':
-    app.run(port=8001, host='127.0.0.1')
+    if "NGROK_AUTHTOKEN" in os.environ:
+        listener = ngrok.forward(addr=f"localhost:8001", authtoken_from_env=True)
+
+    app.run(port=8001, host='0.0.0.0')

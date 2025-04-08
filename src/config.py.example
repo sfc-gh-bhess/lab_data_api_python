@@ -1,6 +1,0 @@
-creds = {
-    "account": "<SNOWFLAKE ACCOUNT>",
-    "user": "<SNOWFLAKE USER>",
-    "password": "<SNOWFLAKE USER PASSWORD>",
-    "warehouse": "<SNOWFLAKE WAREHOUSE>"
-}
