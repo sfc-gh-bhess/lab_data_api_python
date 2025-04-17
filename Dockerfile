@@ -1,6 +1,6 @@
-FROM python:3.8
+FROM python:3.10
 
-RUN pip install snowflake-snowpark-python flask ngrok
+RUN pip install snowflake-snowpark-python flask
 
 COPY ./src /src
 

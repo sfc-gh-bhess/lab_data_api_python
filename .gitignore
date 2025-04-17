@@ -2,3 +2,5 @@ __pycache__
 .DS_Store
 config.json
 config.py
+
+*-token-secret.txt
