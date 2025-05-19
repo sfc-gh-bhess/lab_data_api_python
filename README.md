@@ -54,3 +54,115 @@ Postman.
 
 Additionally, the API serves a testing page you can open in a web browser at `http://localhost:8001/test`.
 
+### Snowpark Container Services
+You can deploy this API in Snowpark Container Services. To do so, first create
+the Docker image for SPCS by running the following:
+```bash
+docker build --platform linux/amd64 -t dataapi .
+```
+
+Next, we need to create some objects in Snowflake. Log into Snowflake and follow
+the following steps:
+1. Navigate to the database and schema you would like to use, e.g.:
+```SQL
+CREATE DATABASE IF NOT EXISTS api;
+USE SCHEMA api.public;
+```
+
+2. Create an IMAGE REPOSITORY:
+```SQL
+CREATE IMAGE REPOSITORY api;
+```
+
+3. Get the URL for the IMAGE REPOSITORY. 
+```SQL
+DESCRIBE IMAGE REPOSITORY api;
+```
+Note the value for `repository_url`.
+
+4. Log into Docker via SnowCLI
+
+5. Upload the image to your image repository:
+```bash
+docker tag dataapi:latest <repository_url>/dataapi:latest
+docker push <repository_url>/dataapi:latest
+```
+
+6. Create the COMPUTE POOL:
+```sql
+USE ROLE ACCOUNTADMIN;
+CREATE COMPUTE POOL api
+  MIN_NODES = 1
+  MAX_NODES = 1
+  INSTANCE_FAMILY = CPU_X64_XS;
+GRANT USAGE, MONITOR ON COMPUTE POOL api TO ROLE data_api_role;
+```
+
+7. Create warehouse for the service to use:
+```sql
+CREATE WAREHOUSE IF NOT EXISTS data_api_wh WITH WAREHOUSE_SIZE='X-SMALL';
+```
+
+8. Create the API service
+```sql
+CREATE SERVICE api
+  IN COMPUTE POOL api
+  FROM SPECIFICATION $$
+spec:
+  containers:
+    - name: api
+      image: <repository_url>/dataapi:latest
+  endpoints:
+    - name: api
+      port: 8001
+      public:true
+serviceRoles:
+- name: api_sr
+  endpoints:
+  - api
+  $$
+  QUERY_WAREHOUSE = data_api_wh
+  ;
+```
+
+9. Grant usage on the endpoint to some role:
+```sql
+GRANT SERVICE ROLE api!api_sr TO ROLE api_user_role;
+```
+
+10. See that the services have started by executing `SHOW SERVICES IN COMPUTE POOL pool1` 
+   and `SELECT system$get_service_status('api_svc')`.
+11. Find the public endpoint for the router service by executing `SHOW ENDPOINTS IN SERVICE api_svc`.
+12. Navigate to the endpoint, login, and see the `Nothing to see here` message.
+
+#### Test with test programs
+First we need to create a user that we can use to access the endpoint.
+```sql
+CREATE USER api_test ...
+```
+
+Next, we grant the user a role that has been granted the `api_svc!api_sr` SERVICE ROLE.
+```sql
+GRANT ROLE api_user_role TO USER api_test;
+```
+
+We need to create a [Programmatic Access Token](https://docs.snowflake.com/en/sql-reference/sql/alter-user-add-programmatic-access-token)
+to access the endpoint programmatically. We can do that in SQL:
+```sql
+ALTER USER api_test ADD PROGRAMMATIC_ACCESS_TOKEN api_pat;
+```
+Copy the returned PAT token to a file named `api-token-secret.txt` in the test directory.
+
+You can test with the `test.py` script in the test directory:
+```bash
+python text.py --account_url <account URL> --role test_role --endpoint https://<SPCS endpoint>/
+```
+which should return the "Nothing to see here" message. You can then test other paths.
+
+Check out `python test.py --help` for help.
+
+Additionally, we created a Streamlit to test the API. You can start that by running
+```bash
+python -m streamlit run test_streamlit.py
+```
+Fill in the details and hit "Fetch it!".
