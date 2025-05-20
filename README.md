@@ -111,7 +111,7 @@ CREATE SERVICE api
 spec:
   containers:
     - name: api
-      image: <repository_url>/dataapi:latest
+      image: /api/public/api/dataapi:latest
   endpoints:
     - name: api
       port: 8001
