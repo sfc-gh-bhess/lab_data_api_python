@@ -26,7 +26,7 @@ def get_token(account_url, role, endpoint, pat):
         'subject_token': pat,
         'subject_token_type': 'programmatic_access_token'
     }
-    url = f'https://{account_url}/oauth/token'
+    url = f'https://{account_url.replace('_', '-')}/oauth/token'
     resp = requests.post(url=url, data=data)
     return resp.text
 
