@@ -155,7 +155,7 @@ Copy the returned PAT token to a file named `api-token-secret.txt` in the test d
 
 You can test with the `test.py` script in the test directory:
 ```bash
-python text.py --account_url <account URL> --role test_role --endpoint https://<SPCS endpoint>/
+python test.py --account_url <account URL> --role test_role --endpoint https://<SPCS endpoint>/
 ```
 which should return the "Nothing to see here" message. You can then test other paths.
 
